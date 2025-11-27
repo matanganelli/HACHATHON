@@ -1,179 +1,139 @@
-📌 MVP – Hub Financeiro
+# 📱 MVP Hub Financeiro - Banco de Dados
 
-Sistema de banco digital completo com contas, transações, PIX, pagamentos, recargas, cashback, seguros e empréstimos.
+![SQL Server](https://img.shields.io/badge/Database-SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Concluído-success?style=for-the-badge)
 
-Este projeto implementa um banco de dados robusto em SQL Server, com tabelas normalizadas, relacionamentos, dados fictícios para testes e stored procedures que executam automaticamente operações financeiras.
+## 📘 Sobre o Projeto
 
-🚀 Tecnologias Utilizadas
+Este projeto consiste na modelagem e implementação de um banco de dados relacional para um **Hub Financeiro Móvel** (Fintech). O sistema centraliza operações como PIX, pagamentos, recargas e empréstimos, utilizando **Stored Procedures** para garantir a integridade das regras de negócio (como atualização automática de saldos).
 
-SQL Server
+## 🧠 Modelagem de Dados
 
-T-SQL
+### 1. MER - Modelo Entidade-Relacionamento (Conceitual)
 
-Stored Procedures
+Abaixo estão as regras de negócio que definem os relacionamentos entre as entidades:
 
-Modelagem Relacional (DER)
+* **Usuários e Contas:** Um usuário pode possuir várias contas (ex: Corrente e Poupança), mas uma conta pertence a apenas um usuário **(1:N)**.
+* **Contas e Transações:** Uma conta pode ter diversas transações, mas uma transação pertence a uma única conta **(1:N)**.
+* **Transações e Categorias:** Uma transação deve ter uma categoria (ex: Alimentação), e uma categoria pode classificar várias transações **(1:N)**.
+* **Contas e Serviços (Pix, Pagamentos, Recargas, Cashback):** Todos esses serviços são vinculados diretamente a uma conta específica. Se a conta for excluída, o histórico é removido (Cascade) **(1:N)**.
+* **Usuários e Produtos Financeiros (Seguros, Empréstimos):** Estes produtos são vinculados ao CPF do usuário (Pessoa), e não à conta bancária específica **(1:N)**.
 
-MER (Modelo Conceitual)
+---
 
-🗄️ Estrutura Geral do Banco de Dados
+### 2. DER - Diagrama Entidade-Relacionamento (Lógico)
 
-O banco MVP_HubFinanceiro é composto pelos seguintes módulos:
+O diagrama abaixo representa a estrutura lógica do banco de dados gerado pelo script.
 
-👤 Usuários
+```mermaid
+erDiagram
+    USUARIOS ||--o{ CONTAS : possui
+    USUARIOS ||--o{ SEGUROS : contrata
+    USUARIOS ||--o{ EMPRESTIMOS : solicita
+    
+    CONTAS ||--o{ TRANSACOES : realiza
+    CONTAS ||--o{ PIX : envia_recebe
+    CONTAS ||--o{ PAGAMENTOS : efetua
+    CONTAS ||--o{ RECARGAS : faz
+    CONTAS ||--o{ CASHBACK : ganha
+    
+    CATEGORIAS ||--o{ TRANSACOES : classifica
 
-Armazenamento dos clientes do sistema.
+    USUARIOS {
+        int id_usuario PK
+        string nome
+        string email
+        string senha_hash
+    }
 
-💳 Contas
+    CONTAS {
+        int id_conta PK
+        int id_usuario FK
+        decimal saldo
+        string tipo_conta
+    }
 
-Contas digitais, correntes e poupança vinculadas a usuários.
+    TRANSACOES {
+        int id_transacao PK
+        int id_conta FK
+        int id_categoria FK
+        decimal valor
+        string descricao
+    }
 
-🏷️ Categorias
+    CATEGORIAS {
+        int id_categoria PK
+        string nome
+        string tipo
+    }
 
-Classificação de transações como entrada ou saída.
+    PIX {
+        int id_pix PK
+        int id_conta FK
+        string chave_destino
+        string tipo_operacao
+    }
 
-🔄 Transações
+🗂 Estrutura das Tabelas
+O banco MVP_HubFinanceiro segue a 3ª Forma Normal (3FN).
 
-Movimentações financeiras com atualização automática de saldo de conta.
+⚙️ Stored Procedures (Automação)
+O diferencial deste projeto é que o saldo não é manipulado manualmente. Utilizamos Procedures para garantir que toda operação financeira reflita imediatamente no saldo da conta.
 
-⚡ PIX
+🔄 Operações que atualizam saldo automaticamente:
+sp_registrar_transacao:
 
-Operações de envio e recebimento.
+Se a categoria for 'entrada' ➝ Soma ao saldo.
 
-🧾 Pagamentos
+Se a categoria for 'saida' ➝ Subtrai do saldo.
 
-Boletos pagos, pendentes ou cancelados.
+sp_registrar_pix:
 
-📱 Recargas
+Identifica se é 'envio' (subtrai) ou 'recebimento' (soma).
 
-Recargas de celular feitas pelo usuário.
+sp_registrar_pagamento:
 
-🎁 Cashback
+Registra o boleto como 'pago' e desconta o valor.
 
-Créditos retornados ao usuário.
+sp_fazer_recarga:
 
-🛡️ Seguros
+Debita o valor da recarga da conta.
 
-Contratação de seguros diversos.
+sp_adicionar_cashback:
 
-💵 Empréstimos
+Credita o valor do benefício na conta.
 
-Solicitações com juros, parcelas e controle de status.
+📋 Procedures de Leitura e Gestão:
+sp_criar_usuario / sp_listar_usuarios
 
-🧩 DER – Diagrama Entidade-Relacionamento (Lógico)
-USUARIOS 1─N CONTAS 1─N TRANSACOES N─1 CATEGORIAS
-USUARIOS 1─N SEGUROS
-USUARIOS 1─N EMPRESTIMOS
-
-CONTAS 1─N PIX
-CONTAS 1─N PAGAMENTOS
-CONTAS 1─N RECARGAS
-CONTAS 1─N CASHBACK
-
-📘 MER – Modelo Conceitual (Simplificado)
-           [USUÁRIO]
-               |
-   ---------------------------------
-   |               |               |
-[CONTA]        [SEGURO]     [EMPRESTIMO]
-   |
-   -----------------------------------------------------------------
-   |        |           |            |                |
-[TRANS]   [PIX]    [PAGAMENTO]   [RECARGA]       [CASHBACK]
-   |
-[CATEGORIA]
-
-🛠 Stored Procedures Implementadas
-👤 Usuários
-
-sp_criar_usuario
-
-sp_listar_usuarios
-
-sp_atualizar_usuario
-
-sp_desativar_usuario
-
-💳 Contas
-
-sp_criar_conta
-
-sp_listar_contas_usuario
-
-🏷️ Categorias
-
-sp_criar_categoria
-
-sp_listar_categorias
-
-🔄 Transações
-
-sp_registrar_transacao (atualiza saldo automaticamente)
-
-sp_extrato_conta
-
-⚡ PIX
-
-sp_registrar_pix (debitando ou creditando o saldo)
-
-🧾 Pagamentos
-
-sp_registrar_pagamento
-
-📱 Recargas
-
-sp_fazer_recarga
-
-🎁 Cashback
-
-sp_adicionar_cashback
-
-🛡️ Seguros
-
-sp_contratar_seguro
-
-💵 Empréstimos
+sp_extrato_conta (Relatório completo com JOINs)
 
 sp_solicitar_emprestimo
 
-📦 Como Executar
+🛠 Como Executar o Projeto
+Clone o repositório:
 
-Abra o SQL Server Management Studio ou Azure Data Studio
+Bash
 
-Execute o script completo .sql contido neste repositório
+git clone [https://github.com/SEU-USUARIO/MVP_HubFinanceiro.git](https://github.com/SEU-USUARIO/MVP_HubFinanceiro.git)
+Abra o SGBD: Utilize o SQL Server Management Studio (SSMS) ou Azure Data Studio.
 
-O banco será criado automaticamente com:
+Execute o Script: Abra o arquivo script_completo.sql e execute (F5). O script irá:
 
-tabelas
+Criar o banco e as tabelas.
 
-relacionamentos
+Inserir dados de teste (Seed Data).
 
-dados fictícios
+Criar as Stored Procedures.
 
-procedures funcionais
+Teste uma operação:
 
-🧪 Dados de Teste Incluídos
+SQL
 
-5 usuários cadastrados
+-- Exemplo: Fazer um PIX de R$ 50,00
+EXEC sp_registrar_pix 1, 'ana@email.com', 'email', 'envio', 50.00;
 
-Contas digitais, poupança e corrente
-
-Categorias de entrada e saída
-
-Transações financeiras reais
-
-PIX enviados/recebidos
-
-Pagamentos variados
-
-Recargas de operadoras
-
-Cashback de diversas compras
-
-Seguros de vida, residencial, celular e automóvel
-
-Empréstimos com juros e status
-
-📄 Licença
-
-Este projeto é livre para uso acadêmico e de demonstração.
+-- Verifique o saldo atualizado
+SELECT * FROM contas WHERE id_conta = 1;
+✒️ Autor Matheus grigorio de sousa
+Desenvolvido como parte do estudo de Arquitetura de Banco de Dados e SQL Server.
