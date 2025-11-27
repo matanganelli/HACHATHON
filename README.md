@@ -15,7 +15,7 @@ Sistema de banco de dados relacional desenvolvido para o MVP de um Hub Financeir
 ---
 
 ## 📖 Sobre o Projeto
-Este banco de dados foi modelado na **3ª Forma Normal (3FN)** para garantir integridade e performance. Ele gerencia:
+
 * **Core Banking:** Usuários, múltiplas contas e autenticação.
 * **Transações:** Entradas, saídas e categorização financeira.
 * **Serviços:** PIX, pagamentos de boletos, recargas e cashback.
