@@ -39,13 +39,12 @@ O modelo conceitual define as regras de negócio e como as entidades interagem:
 ## 🗂 Estrutura do Banco de Dados
 O banco MVP_HubFinanceiro conta com tabelas estruturadas com chaves estrangeiras (FK) e restrições de verificação (CHECK) para garantir a regra de negócio diretamente no banco.
 
-
 ---
-##⚙️ Stored Procedures (Automação)
+## ⚙️ Stored Procedures (Automação)
 O diferencial deste projeto é que o saldo não é manipulado manualmente. Utilizamos Procedures para garantir que toda operação financeira reflita imediatamente no saldo da conta.
 
 ---
-##🔄 Operações que atualizam saldo automaticamente
+## 🔄 Operações que atualizam saldo automaticamente
 sp_registrar_transacao:
 
 Se a categoria for 'entrada' ➝ Soma ao saldo.
@@ -69,7 +68,7 @@ sp_adicionar_cashback:
 Credita o valor do benefício na conta.
 
 ---
-##📋 Procedures de Leitura e Gestão
+## 📋 Procedures de Leitura e Gestão
 sp_criar_usuario / sp_listar_usuarios
 
 sp_extrato_conta (Relatório completo com JOINs)
@@ -92,8 +91,8 @@ Criar o banco de dados e as tabelas.
 Inserir dados de teste (Seed Data).
 
 Criar as Stored Procedures.
----
 
+---
 Teste uma operação:
 
 ---
@@ -106,9 +105,8 @@ EXEC sp_registrar_pix 1, 'ana@email.com', 'email', 'envio', 50.00;
 SELECT * FROM contas WHERE id_conta = 1;
 
 ---
-##✒️ Autor Matheus grigorio de sousa
+## ✒️ Autor Matheus grigorio de sousa
 Desenvolvido como parte do estudo de Arquitetura de Banco de Dados e SQL Server.
-
 ---
 
 ## 📊 Diagrama Entidade-Relacionamento (DER)
