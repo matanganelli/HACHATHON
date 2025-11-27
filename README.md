@@ -102,8 +102,7 @@ erDiagram
     }
 
 
-🗂 Estrutura das Tabelas
-O banco MVP_HubFinanceiro conta com tabelas estruturadas com chaves estrangeiras (FK) e restrições (CHECK).
+
 
 ⚙️ Stored Procedures (Automação)
 O diferencial deste projeto é que o saldo não é manipulado manualmente. Utilizamos Procedures para garantir que toda operação financeira reflita imediatamente no saldo da conta.
