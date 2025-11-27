@@ -1,49 +1,65 @@
-# 📱 MVP Hub Financeiro - Banco de Dados
+# 📱 MVP Hub Financeiro - Database
 
 ![SQL Server](https://img.shields.io/badge/Database-SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Concluído-success?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge)
 
-## 📘 Sobre o Projeto
+Sistema de banco de dados relacional desenvolvido para o MVP de um Hub Financeiro Móvel.
 
-Este projeto consiste na modelagem e implementação de um banco de dados relacional para um **Hub Financeiro Móvel** (Fintech). O sistema centraliza operações como PIX, pagamentos, recargas e empréstimos, utilizando **Stored Procedures** para garantir a integridade das regras de negócio (como atualização automática de saldos).
-
-## 🧠 Modelagem de Dados
-
-### 1. MER - Modelo Entidade-Relacionamento (Conceitual)
-
-Abaixo estão as regras de negócio que definem os relacionamentos entre as entidades:
-
-* **Usuários e Contas:** Um usuário pode possuir várias contas (ex: Corrente e Poupança), mas uma conta pertence a apenas um usuário **(1:N)**.
-* **Contas e Transações:** Uma conta pode ter diversas transações, mas uma transação pertence a uma única conta **(1:N)**.
-* **Transações e Categorias:** Uma transação deve ter uma categoria (ex: Alimentação), e uma categoria pode classificar várias transações **(1:N)**.
-* **Contas e Serviços (Pix, Pagamentos, Recargas, Cashback):** Todos esses serviços são vinculados diretamente a uma conta específica. Se a conta for excluída, o histórico é removido (Cascade) **(1:N)**.
-* **Usuários e Produtos Financeiros (Seguros, Empréstimos):** Estes produtos são vinculados ao CPF do usuário (Pessoa), e não à conta bancária específica **(1:N)**.
+## 📋 Índice
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Modelo Entidade-Relacionamento (MER)](#-modelo-entidade-relacionamento-mer)
+- [Diagrama Entidade-Relacionamento (DER)](#-diagrama-entidade-relacionamento-der)
+- [Estrutura do Banco de Dados](#-estrutura-do-banco-de-dados)
+- [Stored Procedures](#-stored-procedures)
 
 ---
 
-### 2. DER - Diagrama Entidade-Relacionamento (Lógico)
+## 📖 Sobre o Projeto
+Este banco de dados foi modelado na **3ª Forma Normal (3FN)** para garantir integridade e performance. Ele gerencia:
+* **Core Banking:** Usuários, múltiplas contas e autenticação.
+* **Transações:** Entradas, saídas e categorização financeira.
+* **Serviços:** PIX, pagamentos de boletos, recargas e cashback.
+* **Produtos Financeiros:** Empréstimos e seguros.
 
-O diagrama abaixo representa a estrutura lógica do banco de dados gerado pelo script.
+---
+
+## 🧠 Modelo Entidade-Relacionamento (MER)
+
+O modelo conceitual define as regras de negócio e como as entidades interagem:
+
+1.  **Usuário vs Contas:** Um **Usuário** pode possuir várias **Contas** (1:N), mas uma conta pertence a um único usuário.
+2.  **Conta vs Transações:** Uma **Conta** realiza diversas **Transações** (1:N).
+3.  **Transações vs Categorias:** Cada **Transação** pertence a uma **Categoria** específica (N:1).
+4.  **Conta vs Serviços:** Uma **Conta** é a origem de múltiplas operações de **PIX**, **Pagamentos**, **Recargas** e recebimento de **Cashback** (1:N).
+5.  **Usuário vs Produtos:**
+    * Um **Usuário** pode contratar vários **Seguros** (1:N).
+    * Um **Usuário** pode solicitar vários **Empréstimos** (1:N).
+
+---
+
+## 📊 Diagrama Entidade-Relacionamento (DER)
 
 ```mermaid
 erDiagram
-    USUARIOS ||--o{ CONTAS : possui
-    USUARIOS ||--o{ SEGUROS : contrata
-    USUARIOS ||--o{ EMPRESTIMOS : solicita
+    USUARIOS ||--|{ CONTAS : possui
+    USUARIOS ||--|{ SEGUROS : contrata
+    USUARIOS ||--|{ EMPRESTIMOS : solicita
     
-    CONTAS ||--o{ TRANSACOES : realiza
-    CONTAS ||--o{ PIX : envia_recebe
-    CONTAS ||--o{ PAGAMENTOS : efetua
-    CONTAS ||--o{ RECARGAS : faz
-    CONTAS ||--o{ CASHBACK : ganha
+    CONTAS ||--|{ TRANSACOES : realiza
+    CONTAS ||--|{ PIX : envia_recebe
+    CONTAS ||--|{ PAGAMENTOS : efetua
+    CONTAS ||--|{ RECARGAS : faz
+    CONTAS ||--|{ CASHBACK : recebe
     
-    CATEGORIAS ||--o{ TRANSACOES : classifica
+    CATEGORIAS ||--|{ TRANSACOES : classifica
 
     USUARIOS {
         int id_usuario PK
         string nome
         string email
         string senha_hash
+        datetime data_criacao
+        bit ativo
     }
 
     CONTAS {
@@ -59,6 +75,7 @@ erDiagram
         int id_categoria FK
         decimal valor
         string descricao
+        datetime data_transacao
     }
 
     CATEGORIAS {
@@ -71,7 +88,17 @@ erDiagram
         int id_pix PK
         int id_conta FK
         string chave_destino
+        string tipo_chave
         string tipo_operacao
+        decimal valor
+    }
+
+    PAGAMENTOS {
+        int id_pagamento PK
+        int id_conta FK
+        string codigo_barras
+        decimal valor
+        string status
     }
 
 🗂 Estrutura das Tabelas
